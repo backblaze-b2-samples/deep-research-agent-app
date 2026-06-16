@@ -1,0 +1,42 @@
+# Railway Deployment
+
+Deploy both services (web + api) on Railway.
+
+## Setup
+
+1. Create a new Railway project
+2. Add two services from the same repo:
+
+### Web Service (Next.js)
+- **Root Directory**: `apps/web`
+- **Build Command**: `pnpm install && pnpm build`
+- **Start Command**: `pnpm start`
+- **Port**: `3000`
+
+### API Service (FastAPI)
+- **Root Directory**: `services/api`
+- **Build Command**: `pip install -r requirements.txt && python -m playwright install --with-deps chromium`
+- **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+> The research agent renders pages in headless Chromium, so the build must
+> install the browser (and its OS deps via `--with-deps`).
+
+## Environment Variables
+
+Set these on the API service:
+
+| Variable | Value |
+|----------|-------|
+| `B2_ENDPOINT` | Your B2 S3 endpoint |
+| `B2_REGION` | Region in the endpoint (e.g. `us-west-004`) |
+| `B2_APPLICATION_KEY_ID` | Your B2 application key ID |
+| `B2_APPLICATION_KEY` | Your B2 application key |
+| `B2_BUCKET_NAME` | Your bucket name |
+| `ANTHROPIC_API_KEY` | Your Anthropic API key (powers the agent) |
+| `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) |
+
+Set this on the Web service:
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | Your API service URL (e.g., `https://api-production-xxx.up.railway.app`) |
