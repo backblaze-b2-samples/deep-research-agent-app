@@ -47,7 +47,7 @@ whole loop hermetic.
 - [ ] Implement the smallest coherent change
 - [ ] Add or update tests
 - [ ] Run: `pnpm typecheck && pnpm lint && pnpm lint:api && pnpm test:api && pnpm check:structure`
-- [ ] Update docs in the same PR (see AGENTS.md §8)
+- [ ] Update docs in the same PR (see AGENTS.md Doc Update Mapping)
 - [ ] Move plan to `docs/exec-plans/completed/` after validation
 
 ## Bugfix
@@ -66,7 +66,7 @@ whole loop hermetic.
 
 ## Documentation Update
 
-- [ ] Update only the canonical location (see AGENTS.md §8 doc update mapping)
+- [ ] Update only the canonical location (see AGENTS.md Doc Update Mapping)
 - [ ] Never duplicate content — link instead
 - [ ] Update `<!-- last_verified: YYYY-MM-DD -->` header
 
