@@ -1,5 +1,6 @@
 import functools
 import io
+import logging
 import mimetypes
 from datetime import UTC, datetime
 from urllib.parse import quote
@@ -11,6 +12,8 @@ from botocore.exceptions import ClientError
 from app.config import settings
 from app.types import FileMetadata
 from app.types.formatting import humanize_bytes
+
+logger = logging.getLogger(__name__)
 
 
 def _guess_content_type(key: str) -> str:
@@ -37,6 +40,7 @@ def _public_url(key: str) -> str | None:
 
 @functools.lru_cache(maxsize=1)
 def get_s3_client():
+    logger.debug("B2 endpoint: %s", settings.b2_endpoint_url)
     return boto3.client(
         "s3",
         endpoint_url=settings.b2_endpoint_url or None,

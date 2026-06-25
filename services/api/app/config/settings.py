@@ -79,6 +79,7 @@ class Settings(BaseSettings):
             return ""
         endpoint = f"https://s3.{self.b2_region}.backblazeb2.com"
         host = urlparse(endpoint).hostname
+        # Defensive assertion: regex validation above makes this unreachable.
         if host is None or not host.endswith(".backblazeb2.com"):
             raise ValueError("Derived B2 endpoint must target backblazeb2.com")
         return endpoint

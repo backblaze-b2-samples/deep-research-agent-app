@@ -42,6 +42,9 @@ public buckets, `B2_PUBLIC_URL_BASE` before removing old variables. Legacy
 `B2_PUBLIC_URL_BASE` is absent. Remove both legacy variables after the Railway
 environment has the standard names.
 
+**After rollout:** delete `B2_ENDPOINT` and `B2_PUBLIC_URL` from Railway
+Variables so the deployment only carries the standardized B2 contract.
+
 Set this on the Web service:
 
 | Variable | Value |
