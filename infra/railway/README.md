@@ -35,6 +35,11 @@ Set these on the API service:
 | `ANTHROPIC_API_KEY` | Your Anthropic API key (powers the agent) |
 | `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) |
 
+During rollout, old `B2_ENDPOINT` and `B2_PUBLIC_URL` variables can remain set
+without blocking startup, but the API ignores them. Remove those legacy
+variables after the Railway environment has `B2_REGION` and any public-bucket
+URL has moved to `B2_PUBLIC_URL_BASE`.
+
 Set this on the Web service:
 
 | Variable | Value |

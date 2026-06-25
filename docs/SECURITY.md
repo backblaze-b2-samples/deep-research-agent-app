@@ -11,6 +11,15 @@ Security principles and implementation for the deep-research-agent-app.
 - **API -> open web**: The agent fetches arbitrary URLs in a headless browser; treated as the least-trusted boundary (see SSRF + prompt injection below)
 - **Client -> B2**: Presigned URLs for previewing cached artifacts (10-min expiry)
 
+## B2 Endpoint Configuration
+
+- `B2_REGION` is validated as a Backblaze region token before the API derives
+  the S3 endpoint, preventing user-controlled URL authority, path, query, or
+  fragment injection into signed B2 requests.
+- The legacy `B2_ENDPOINT` dotenv key is ignored during the env migration so it
+  cannot redirect signed S3 traffic. The active endpoint is always derived from
+  `B2_REGION`.
+
 ## Agent-Fetched Content (the highest-risk surface)
 
 The agent decides which URLs to fetch, so `repo/browser.py` is the security

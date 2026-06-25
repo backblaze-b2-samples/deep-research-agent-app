@@ -125,6 +125,18 @@ Frontend at `localhost:3000`, API at `localhost:8000`. Open **Research**, ask a 
 | `RESEARCH_MAX_SOURCES` | no | Pages fetched/cached per run (default 8) |
 | `RESEARCH_EFFORT` | no | Adaptive-thinking effort: `low`/`medium`/`high` (default `medium`) |
 
+### B2 environment migration
+
+The app now uses the standardized B2 environment contract above. During the
+expand phase, existing `.env` files and deployment secrets may still contain
+`B2_ENDPOINT` and/or `B2_PUBLIC_URL`; the API ignores those legacy keys so
+rolling deploys still start. Runtime S3 traffic always derives the endpoint
+from `B2_REGION`, and public object links use `B2_PUBLIC_URL_BASE`.
+
+After every local and hosted environment has `B2_REGION` and, for public
+buckets, `B2_PUBLIC_URL_BASE`, remove the legacy `B2_ENDPOINT` and
+`B2_PUBLIC_URL` entries from `.env` files and deployment secrets.
+
 ## Core Features
 
 - [Research Agent](docs/features/research-agent.md) — the Claude Sonnet 4.6 tool-use loop that plans, searches, reads, and writes a cited report

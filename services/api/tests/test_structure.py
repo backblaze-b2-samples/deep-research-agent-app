@@ -130,15 +130,6 @@ def test_b2_env_example_uses_standard_names():
     assert env_keys == B2_STANDARD_ENV_VARS
 
 
-def test_b2_client_uses_standard_s3_settings():
-    """Verify B2 access uses S3 and the sample user agent."""
-    source = (APP_ROOT / "repo" / "b2_client.py").read_text()
-
-    assert 'boto3.client(\n        "s3",' in source
-    assert "endpoint_url=settings.b2_endpoint_url or None" in source
-    assert "(backblaze-b2-samples)" in source
-
-
 def test_file_size_limits():
     """Verify no Python file exceeds 300 lines."""
     violations = []

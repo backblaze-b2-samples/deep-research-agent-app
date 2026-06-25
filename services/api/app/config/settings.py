@@ -1,4 +1,10 @@
+import re
+from urllib.parse import urlparse
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
+
+_B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$")
 
 
 class Settings(BaseSettings):
@@ -43,13 +49,34 @@ class Settings(BaseSettings):
     # volume in production if you care about surviving restarts.
     download_count_file: str = "data/download_count.json"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    # Ignore legacy dotenv keys such as B2_ENDPOINT and B2_PUBLIC_URL during
+    # the env-var migration. They are no longer modeled or used at runtime.
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
+
+    @field_validator("b2_region")
+    @classmethod
+    def validate_b2_region(cls, value: str) -> str:
+        if not value:
+            return value
+        if not _B2_REGION_PATTERN.fullmatch(value):
+            raise ValueError(
+                "B2_REGION must be a Backblaze region token like us-west-004"
+            )
+        return value
 
     @property
     def b2_endpoint_url(self) -> str:
         if not self.b2_region:
             return ""
-        return f"https://s3.{self.b2_region}.backblazeb2.com"
+        endpoint = f"https://s3.{self.b2_region}.backblazeb2.com"
+        host = urlparse(endpoint).hostname
+        if host is None or not host.endswith(".backblazeb2.com"):
+            raise ValueError("Derived B2 endpoint must target backblazeb2.com")
+        return endpoint
 
     @property
     def cors_origins(self) -> list[str]:
