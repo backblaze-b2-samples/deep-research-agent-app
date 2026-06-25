@@ -30,7 +30,6 @@ const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 // .env.example. Keep in sync with services/api/main.py REQUIRED_B2_SETTINGS
 // and PLACEHOLDER_VALUES.
 const REQUIRED_B2_VARS = [
-  "B2_ENDPOINT",
   "B2_REGION",
   "B2_APPLICATION_KEY_ID",
   "B2_APPLICATION_KEY",
@@ -40,7 +39,6 @@ const REQUIRED_B2_VARS = [
 // give it its own actionable message.
 const REQUIRED_OTHER_VARS = ["ANTHROPIC_API_KEY"];
 const PLACEHOLDERS = new Set([
-  "your_b2_endpoint",
   "your_b2_region",
   "your_application_key_id",
   "your_application_key",

@@ -90,12 +90,13 @@ Open `.env` and fill it in. Head to the [Backblaze B2 dashboard](https://secure.
 
 1. **Create a bucket.** Paste each value into `.env`:
    - **Bucket Unique Name** → `B2_BUCKET_NAME`
-   - **Endpoint** → `B2_ENDPOINT` (e.g. `https://s3.us-west-004.backblazeb2.com`)
-   - The region embedded in the endpoint → `B2_REGION` (e.g. `us-west-004`)
+   - **Region** → `B2_REGION` (e.g. `us-west-004`)
 2. **Create an application key** with `Read and Write` permission:
    - **keyID** → `B2_APPLICATION_KEY_ID`
    - **applicationKey** → `B2_APPLICATION_KEY` *(only shown once)*
-3. **Add your Anthropic key** → `ANTHROPIC_API_KEY` (from [console.anthropic.com](https://console.anthropic.com/)).
+3. Optional for public buckets: set `B2_PUBLIC_URL_BASE` to the public object
+   URL base.
+4. **Add your Anthropic key** → `ANTHROPIC_API_KEY` (from [console.anthropic.com](https://console.anthropic.com/)).
 
 > Walkthroughs: [creating a bucket](https://www.backblaze.com/docs/cloud-storage-create-and-manage-buckets?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-deep-research-agent-app) · [creating app keys](https://www.backblaze.com/docs/cloud-storage-create-and-manage-app-keys?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-deep-research-agent-app).
 
@@ -113,11 +114,11 @@ Frontend at `localhost:3000`, API at `localhost:8000`. Open **Research**, ask a 
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `B2_ENDPOINT` | yes | S3 endpoint, e.g. `https://s3.us-west-004.backblazeb2.com` |
-| `B2_REGION` | yes | Region in the endpoint, e.g. `us-west-004` |
+| `B2_REGION` | yes | B2 S3 region, e.g. `us-west-004`; the S3 endpoint is derived from it |
 | `B2_APPLICATION_KEY_ID` | yes | B2 application key ID |
 | `B2_APPLICATION_KEY` | yes | B2 application key |
 | `B2_BUCKET_NAME` | yes | Target bucket |
+| `B2_PUBLIC_URL_BASE` | no | Public object URL base for public buckets |
 | `ANTHROPIC_API_KEY` | yes | Powers the research agent |
 | `ANTHROPIC_MODEL` | no | Default `claude-sonnet-4-6` |
 | `RESEARCH_MAX_SEARCHES` | no | Web-search cap per run (default 8) |

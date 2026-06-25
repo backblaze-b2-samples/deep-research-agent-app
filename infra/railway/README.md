@@ -27,11 +27,11 @@ Set these on the API service:
 
 | Variable | Value |
 |----------|-------|
-| `B2_ENDPOINT` | Your B2 S3 endpoint |
-| `B2_REGION` | Region in the endpoint (e.g. `us-west-004`) |
+| `B2_REGION` | Your B2 S3 region (e.g. `us-west-004`) |
 | `B2_APPLICATION_KEY_ID` | Your B2 application key ID |
 | `B2_APPLICATION_KEY` | Your B2 application key |
 | `B2_BUCKET_NAME` | Your bucket name |
+| `B2_PUBLIC_URL_BASE` | Optional public object URL base for public buckets |
 | `ANTHROPIC_API_KEY` | Your Anthropic API key (powers the agent) |
 | `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) |
 
