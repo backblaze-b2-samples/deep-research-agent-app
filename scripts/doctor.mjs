@@ -35,6 +35,11 @@ const REQUIRED_B2_VARS = [
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
 ];
+const OPTIONAL_B2_VARS = ["B2_PUBLIC_URL_BASE"];
+const LEGACY_B2_VARS = {
+  B2_ENDPOINT: "Remove it after rollout. The S3 endpoint is now derived from B2_REGION.",
+  B2_PUBLIC_URL: "Rename it to B2_PUBLIC_URL_BASE. It is only a temporary fallback.",
+};
 // The research agent needs an Anthropic key — checked separately so we can
 // give it its own actionable message.
 const REQUIRED_OTHER_VARS = ["ANTHROPIC_API_KEY"];
@@ -177,6 +182,25 @@ function checkEnv() {
     return;
   }
   const env = parseEnvFile(ENV_FILE);
+  const knownB2Vars = new Set([
+    ...REQUIRED_B2_VARS,
+    ...OPTIONAL_B2_VARS,
+    ...Object.keys(LEGACY_B2_VARS),
+  ]);
+  const unknownB2Vars = Object.keys(env).filter(
+    (k) => k.startsWith("B2_") && !knownB2Vars.has(k),
+  );
+  if (unknownB2Vars.length > 0) {
+    fail(
+      `.env has unknown B2 variables: ${unknownB2Vars.join(", ")}`,
+      "Remove misspelled or unsupported B2_* keys, or rename them to the standardized variables in .env.example",
+    );
+  }
+  for (const [key, fix] of Object.entries(LEGACY_B2_VARS)) {
+    if (env[key]) {
+      warn(`.env still contains legacy ${key}`, fix);
+    }
+  }
   const missing = REQUIRED_B2_VARS.filter((k) => !env[k]);
   if (missing.length > 0) {
     fail(

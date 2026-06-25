@@ -127,15 +127,16 @@ Frontend at `localhost:3000`, API at `localhost:8000`. Open **Research**, ask a 
 
 ### B2 environment migration
 
-The app now uses the standardized B2 environment contract above. During the
-expand phase, existing `.env` files and deployment secrets may still contain
-`B2_ENDPOINT` and/or `B2_PUBLIC_URL`; the API ignores those legacy keys so
-rolling deploys still start. Runtime S3 traffic always derives the endpoint
-from `B2_REGION`, and public object links use `B2_PUBLIC_URL_BASE`.
+The app now uses the standardized B2 environment contract above. Roll it out
+in expand/contract order: first add `B2_REGION` and, for public buckets,
+`B2_PUBLIC_URL_BASE` while keeping any existing legacy variables. During this
+phase `B2_ENDPOINT` is accepted but ignored because runtime S3 traffic always
+derives the endpoint from `B2_REGION`. `B2_PUBLIC_URL` is accepted only as a
+temporary fallback when `B2_PUBLIC_URL_BASE` is not set.
 
-After every local and hosted environment has `B2_REGION` and, for public
-buckets, `B2_PUBLIC_URL_BASE`, remove the legacy `B2_ENDPOINT` and
-`B2_PUBLIC_URL` entries from `.env` files and deployment secrets.
+After every local and hosted environment has the standard variables, remove
+the legacy `B2_ENDPOINT` and `B2_PUBLIC_URL` entries from `.env` files and
+deployment secrets.
 
 ## Core Features
 

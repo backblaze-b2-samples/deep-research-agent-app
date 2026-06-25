@@ -16,9 +16,10 @@ Security principles and implementation for the deep-research-agent-app.
 - `B2_REGION` is validated as a Backblaze region token before the API derives
   the S3 endpoint, preventing user-controlled URL authority, path, query, or
   fragment injection into signed B2 requests.
-- The legacy `B2_ENDPOINT` dotenv key is ignored during the env migration so it
-  cannot redirect signed S3 traffic. The active endpoint is always derived from
-  `B2_REGION`.
+- The legacy `B2_ENDPOINT` dotenv key is tolerated during the env migration but
+  ignored so it cannot redirect signed S3 traffic. The active endpoint is
+  always derived from `B2_REGION`. Legacy `B2_PUBLIC_URL` is only a temporary
+  fallback for public links when `B2_PUBLIC_URL_BASE` is absent.
 
 ## Agent-Fetched Content (the highest-risk surface)
 

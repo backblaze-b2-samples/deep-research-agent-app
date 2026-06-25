@@ -6,17 +6,33 @@ from pydantic import ValidationError
 from app.config import Settings, settings
 from app.repo import b2_client
 
+B2_ENV_KEYS = (
+    "B2_REGION",
+    "B2_APPLICATION_KEY_ID",
+    "B2_APPLICATION_KEY",
+    "B2_BUCKET_NAME",
+    "B2_PUBLIC_URL_BASE",
+    "B2_ENDPOINT",
+    "B2_PUBLIC_URL",
+)
+
+
+class FakeS3Client:
+    def __init__(self):
+        self.put_object_kwargs = {}
+
+    def put_object(self, **kwargs):
+        self.put_object_kwargs = kwargs
+
+
+def clear_b2_env(monkeypatch):
+    for key in B2_ENV_KEYS:
+        monkeypatch.delenv(key, raising=False)
+
 
 def test_legacy_b2_dotenv_keys_do_not_block_startup(tmp_path, monkeypatch):
     """Legacy rollout vars are ignored while the standard vars drive runtime."""
-    for key in (
-        "B2_REGION",
-        "B2_APPLICATION_KEY_ID",
-        "B2_APPLICATION_KEY",
-        "B2_BUCKET_NAME",
-        "B2_PUBLIC_URL_BASE",
-    ):
-        monkeypatch.delenv(key, raising=False)
+    clear_b2_env(monkeypatch)
 
     env_file = tmp_path / ".env"
     env_file.write_text(
@@ -28,6 +44,7 @@ def test_legacy_b2_dotenv_keys_do_not_block_startup(tmp_path, monkeypatch):
                 "B2_BUCKET_NAME=bucket-name",
                 "B2_ENDPOINT=https://legacy.example.test",
                 "B2_PUBLIC_URL=https://legacy-public.example.test",
+                "B2_PUBLIC_URL_BASE=https://public.example.test",
             ]
         )
     )
@@ -35,14 +52,64 @@ def test_legacy_b2_dotenv_keys_do_not_block_startup(tmp_path, monkeypatch):
     loaded = Settings(_env_file=env_file)
 
     assert loaded.b2_endpoint_url == "https://s3.us-west-004.backblazeb2.com"
+    assert loaded.effective_b2_public_url_base == "https://public.example.test"
+
+
+def test_legacy_public_url_falls_back_when_standard_name_missing(
+    tmp_path, monkeypatch
+):
+    clear_b2_env(monkeypatch)
+
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "\n".join(
+            [
+                "B2_REGION=us-west-004",
+                "B2_APPLICATION_KEY_ID=key-id",
+                "B2_APPLICATION_KEY=application-key",
+                "B2_BUCKET_NAME=bucket-name",
+                "B2_PUBLIC_URL=https://legacy-public.example.test",
+            ]
+        )
+    )
+
+    loaded = Settings(_env_file=env_file)
+
     assert loaded.b2_public_url_base == ""
+    assert (
+        loaded.effective_b2_public_url_base
+        == "https://legacy-public.example.test"
+    )
+
+
+def test_unknown_b2_dotenv_key_is_rejected(tmp_path, monkeypatch):
+    clear_b2_env(monkeypatch)
+
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "\n".join(
+            [
+                "B2_REGION=us-west-004",
+                "B2_APPLICATION_KEY_ID=key-id",
+                "B2_APPLICATION_KEY=application-key",
+                "B2_BUCKET_NAME=bucket-name",
+                "B2_UNKNOWN_SETTING=value",
+            ]
+        )
+    )
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=env_file)
 
 
 @pytest.mark.parametrize(
     "region",
     [
         "us-west-004@attacker.example/",
+        "us-west-004.attacker.com#",
         "us-west-004/path",
+        "us-west-004?x=",
+        "us-west-004:443@attacker.com",
         "us-west-004#fragment",
         "us-west-004:443",
         "us-west-004\\path",
@@ -98,16 +165,51 @@ def test_b2_client_uses_s3_endpoint_and_sample_user_agent(monkeypatch):
     assert "(backblaze-b2-samples)" in config.user_agent_extra
 
 
-def test_public_url_strips_trailing_base_slash(monkeypatch):
+def test_upload_file_public_url_strips_trailing_base_slash(monkeypatch):
+    fake_client = FakeS3Client()
     monkeypatch.setattr(
         settings,
         "b2_public_url_base",
         "https://bucket.s3.us-west-004.backblazeb2.com/",
     )
+    monkeypatch.setattr(settings, "b2_public_url", "")
+    monkeypatch.setattr(settings, "b2_bucket_name", "bucket-name")
+    monkeypatch.setattr(b2_client, "get_s3_client", lambda: fake_client)
 
-    public_url = b2_client._public_url("research/thread/source page.md")
+    metadata = b2_client.upload_file(
+        b"page",
+        "research/thread/source page.md",
+        "text/markdown",
+    )
 
-    assert public_url == (
+    assert fake_client.put_object_kwargs["Bucket"] == "bucket-name"
+    assert fake_client.put_object_kwargs["Key"] == (
+        "research/thread/source page.md"
+    )
+    assert metadata.url == (
         "https://bucket.s3.us-west-004.backblazeb2.com/"
+        "research/thread/source%20page.md"
+    )
+
+
+def test_upload_file_public_url_falls_back_to_legacy_name(monkeypatch):
+    fake_client = FakeS3Client()
+    monkeypatch.setattr(settings, "b2_public_url_base", "")
+    monkeypatch.setattr(
+        settings,
+        "b2_public_url",
+        "https://legacy-public.example.test/",
+    )
+    monkeypatch.setattr(settings, "b2_bucket_name", "bucket-name")
+    monkeypatch.setattr(b2_client, "get_s3_client", lambda: fake_client)
+
+    metadata = b2_client.upload_file(
+        b"page",
+        "research/thread/source page.md",
+        "text/markdown",
+    )
+
+    assert metadata.url == (
+        "https://legacy-public.example.test/"
         "research/thread/source%20page.md"
     )

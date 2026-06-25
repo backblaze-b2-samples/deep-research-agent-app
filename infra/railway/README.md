@@ -35,10 +35,12 @@ Set these on the API service:
 | `ANTHROPIC_API_KEY` | Your Anthropic API key (powers the agent) |
 | `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) |
 
-During rollout, old `B2_ENDPOINT` and `B2_PUBLIC_URL` variables can remain set
-without blocking startup, but the API ignores them. Remove those legacy
-variables after the Railway environment has `B2_REGION` and any public-bucket
-URL has moved to `B2_PUBLIC_URL_BASE`.
+Roll out B2 env changes in expand/contract order: add `B2_REGION` and, for
+public buckets, `B2_PUBLIC_URL_BASE` before removing old variables. Legacy
+`B2_ENDPOINT` can remain set without blocking startup but is ignored. Legacy
+`B2_PUBLIC_URL` is used only as a temporary fallback when
+`B2_PUBLIC_URL_BASE` is absent. Remove both legacy variables after the Railway
+environment has the standard names.
 
 Set this on the Web service:
 

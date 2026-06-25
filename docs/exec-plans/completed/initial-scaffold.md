@@ -244,7 +244,7 @@ Touch points for the env rename: `.env.example`, `services/api/app/config/settin
 - **config/** `settings.py`: env renames + new keys above.
 - **repo/** add `llm_client.py` (anthropic), `browser.py` (playwright + trafilatura),
   `b2_research.py` (prefix-scoped ops); edit `b2_client.py` (settings rename, region,
-  user agent → `b2ai-deep-research-agent-app`).
+  user agent → `b2ai-deep-research-agent-app (backblaze-b2-samples)`).
 - **service/** add `research.py`, `library.py`, `report.py`, `research_search.py`;
   keep `files.py`/`upload.py`/`metadata.py`.
 - **runtime/** add `research.py` — `POST /research`, `POST /research/{id}/follow-up`,
@@ -274,5 +274,5 @@ Touch points for the env rename: `.env.example`, `services/api/app/config/settin
 ## Standards self-check
 
 1. S3 API default, no b2-native ✅
-2. Custom user agent `b2ai-deep-research-agent-app` on the single S3 client ✅
+2. Custom user agent `b2ai-deep-research-agent-app (backblaze-b2-samples)` on the single S3 client ✅
 3. Standardized `B2_*` names incl. `B2_APPLICATION_KEY_ID` + `B2_REGION` ✅
