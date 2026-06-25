@@ -96,3 +96,18 @@ def test_b2_client_uses_s3_endpoint_and_sample_user_agent(monkeypatch):
     assert kwargs["aws_secret_access_key"] == "application-key"
     assert config.signature_version == "s3v4"
     assert "(backblaze-b2-samples)" in config.user_agent_extra
+
+
+def test_public_url_strips_trailing_base_slash(monkeypatch):
+    monkeypatch.setattr(
+        settings,
+        "b2_public_url_base",
+        "https://bucket.s3.us-west-004.backblazeb2.com/",
+    )
+
+    public_url = b2_client._public_url("research/thread/source page.md")
+
+    assert public_url == (
+        "https://bucket.s3.us-west-004.backblazeb2.com/"
+        "research/thread/source%20page.md"
+    )
