@@ -4,6 +4,7 @@ import ast
 from pathlib import Path
 
 APP_ROOT = Path(__file__).parent.parent / "app"
+REPO_ROOT = APP_ROOT.parent.parent.parent
 
 # Layer ordering: lower layers must not import from higher layers
 LAYER_ORDER = ["types", "config", "repo", "service", "runtime"]
@@ -87,6 +88,14 @@ def test_boto3_only_in_repo():
 # Playwright/trafilatura — all of that is I/O that belongs behind repo/.
 REPO_ONLY_SDKS = ("anthropic", "playwright", "trafilatura", "httpx")
 
+B2_STANDARD_ENV_VARS = {
+    "B2_APPLICATION_KEY_ID",
+    "B2_APPLICATION_KEY",
+    "B2_BUCKET_NAME",
+    "B2_REGION",
+    "B2_PUBLIC_URL_BASE",
+}
+
 
 def test_research_sdks_only_in_repo():
     """Verify anthropic/playwright/trafilatura/httpx live only in app/repo/."""
@@ -104,6 +113,21 @@ def test_research_sdks_only_in_repo():
                     rel = pyfile.relative_to(APP_ROOT.parent)
                     violations.append(f"{rel}: {root} imported outside repo/")
     assert violations == [], "SDK boundary violations:\n" + "\n".join(violations)
+
+
+def test_b2_env_example_uses_standard_names():
+    """Verify .env.example documents only standardized B2 variables."""
+    env_keys = set()
+    env_example = REPO_ROOT / ".env.example"
+    for raw_line in env_example.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key = line.split("=", 1)[0].strip()
+        if key.startswith("B2_"):
+            env_keys.add(key)
+
+    assert env_keys == B2_STANDARD_ENV_VARS
 
 
 def test_file_size_limits():

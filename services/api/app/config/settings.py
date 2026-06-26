@@ -1,14 +1,26 @@
+import re
+from urllib.parse import urlparse
+
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
+
+# Backblaze regions are lower-case location tokens such as us-west-004 and
+# eu-central-003. Keeping the grammar tight prevents URL authority injection
+# when deriving the S3 endpoint.
+_B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$")
 
 
 class Settings(BaseSettings):
     # --- Backblaze B2 (S3-compatible API) ---
-    b2_endpoint: str = ""
     b2_region: str = ""
     b2_application_key_id: str = ""
     b2_application_key: str = ""
     b2_bucket_name: str = ""
-    b2_public_url: str = ""
+    b2_public_url_base: str = ""
+    # Migration-only legacy names. Keep these explicit so old dotenv files do
+    # not fail validation, while unrelated unknown keys still fail.
+    b2_endpoint: str = Field(default="", exclude=True, repr=False)
+    b2_public_url: str = Field(default="", exclude=True, repr=False)
 
     # --- Anthropic / research agent ---
     anthropic_api_key: str = ""
@@ -44,7 +56,37 @@ class Settings(BaseSettings):
     # volume in production if you care about surviving restarts.
     download_count_file: str = "data/download_count.json"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "forbid",
+    }
+
+    @field_validator("b2_region")
+    @classmethod
+    def validate_b2_region(cls, value: str) -> str:
+        if not value:
+            return value
+        if not _B2_REGION_PATTERN.fullmatch(value):
+            raise ValueError(
+                "B2_REGION must be a Backblaze region token like us-west-004"
+            )
+        return value
+
+    @property
+    def b2_endpoint_url(self) -> str:
+        if not self.b2_region:
+            return ""
+        endpoint = f"https://s3.{self.b2_region}.backblazeb2.com"
+        host = urlparse(endpoint).hostname
+        # Defensive assertion: regex validation above makes this unreachable.
+        if host is None or not host.endswith(".backblazeb2.com"):
+            raise ValueError("Derived B2 endpoint must target backblazeb2.com")
+        return endpoint
+
+    @property
+    def effective_b2_public_url_base(self) -> str:
+        return self.b2_public_url_base or self.b2_public_url
 
     @property
     def cors_origins(self) -> list[str]:
