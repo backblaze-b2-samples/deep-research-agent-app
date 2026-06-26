@@ -1,5 +1,6 @@
 import functools
 import io
+import logging
 import mimetypes
 from datetime import UTC, datetime
 from urllib.parse import quote
@@ -11,6 +12,8 @@ from botocore.exceptions import ClientError
 from app.config import settings
 from app.types import FileMetadata
 from app.types.formatting import humanize_bytes
+
+logger = logging.getLogger(__name__)
 
 
 def _guess_content_type(key: str) -> str:
@@ -28,22 +31,27 @@ def _split_key(key: str) -> tuple[str, str]:
 
 def _public_url(key: str) -> str | None:
     """Build a public URL for an object key, percent-encoding the path."""
-    if not settings.b2_public_url:
+    public_url_base = settings.effective_b2_public_url_base
+    if not public_url_base:
         return None
-    return f"{settings.b2_public_url}/{quote(key, safe='/')}"
+    base_url = public_url_base.rstrip("/")
+    return f"{base_url}/{quote(key, safe='/')}"
 
 
 @functools.lru_cache(maxsize=1)
 def get_s3_client():
+    logger.debug("B2 endpoint: %s", settings.b2_endpoint_url)
     return boto3.client(
         "s3",
-        endpoint_url=settings.b2_endpoint,
+        endpoint_url=settings.b2_endpoint_url or None,
         region_name=settings.b2_region or None,
         aws_access_key_id=settings.b2_application_key_id,
         aws_secret_access_key=settings.b2_application_key,
         config=Config(
             signature_version="s3v4",
-            user_agent_extra="b2ai-deep-research-agent-app",
+            user_agent_extra=(
+                "b2ai-deep-research-agent-app (backblaze-b2-samples)"
+            ),
         ),
     )
 

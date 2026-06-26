@@ -216,7 +216,7 @@ No b2-native calls. Custom user agent set on the single S3 client in
 | `package.json` `name` (root + web + shared) | `vibe-coding-starter-kit*` | `deep-research-agent-app*` |
 | Title Case (sidebar brand, README H1) | "Vibe Coding Starter Kit" / "OSS Starter Kit" | "Deep Research Agent" |
 | FastAPI app title | "OSS Starter Kit API" | "Deep Research Agent API" |
-| **`user_agent_extra`** (Standard #2) | `b2ai-oss-start` | `b2ai-deep-research-agent-app` |
+| **`user_agent_extra`** (Standard #2) | `b2ai-oss-start` | `b2ai-deep-research-agent-app (backblaze-b2-samples)` |
 | **UTM `utm_content`** (README + sidebar footer links) | `b2ai-oss-start` | `b2ai-deep-research-agent-app` |
 | image filenames / workflow slugs / railway service names | `*starterkit*` / `*starter-kit*` | `*deep-research-agent-app*` |
 
@@ -224,9 +224,11 @@ No b2-native calls. Custom user agent set on the single S3 client in
 
 | Starter (`.env.example`, `settings.py`, `main.py`, `doctor.mjs`) | New (standardized) |
 |---|---|
-| `B2_KEY_ID` / `settings.b2_key_id` | **`B2_APPLICATION_KEY_ID`** / `b2_application_key_id` |
+| legacy key id variable / setting | **`B2_APPLICATION_KEY_ID`** / `b2_application_key_id` |
 | *(missing)* | **add `B2_REGION`** / `b2_region` |
-| `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`, `B2_ENDPOINT` | unchanged (already standard) |
+| `B2_APPLICATION_KEY`, `B2_BUCKET_NAME` | unchanged (already standard) |
+| S3 endpoint setting | derive from `B2_REGION` |
+| public object URL setting | `B2_PUBLIC_URL_BASE` |
 | — add — | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `RESEARCH_MAX_SEARCHES`, `RESEARCH_MAX_SOURCES`, `RESEARCH_EFFORT` |
 
 Touch points for the env rename: `.env.example`, `services/api/app/config/settings.py`,
@@ -242,7 +244,7 @@ Touch points for the env rename: `.env.example`, `services/api/app/config/settin
 - **config/** `settings.py`: env renames + new keys above.
 - **repo/** add `llm_client.py` (anthropic), `browser.py` (playwright + trafilatura),
   `b2_research.py` (prefix-scoped ops); edit `b2_client.py` (settings rename, region,
-  user agent → `b2ai-deep-research-agent-app`).
+  user agent → `b2ai-deep-research-agent-app (backblaze-b2-samples)`).
 - **service/** add `research.py`, `library.py`, `report.py`, `research_search.py`;
   keep `files.py`/`upload.py`/`metadata.py`.
 - **runtime/** add `research.py` — `POST /research`, `POST /research/{id}/follow-up`,
@@ -272,5 +274,5 @@ Touch points for the env rename: `.env.example`, `services/api/app/config/settin
 ## Standards self-check
 
 1. S3 API default, no b2-native ✅
-2. Custom user agent `b2ai-deep-research-agent-app` on the single S3 client ✅
+2. Custom user agent `b2ai-deep-research-agent-app (backblaze-b2-samples)` on the single S3 client ✅
 3. Standardized `B2_*` names incl. `B2_APPLICATION_KEY_ID` + `B2_REGION` ✅

@@ -106,7 +106,7 @@ services/api/
 
 ## External Services
 
-- **Backblaze B2 S3 API** — artifact storage, retrieval, deletion, presigned URLs (custom user agent `b2ai-deep-research-agent-app`, signature v4, no b2-native API).
+- **Backblaze B2 S3 API** — artifact storage, retrieval, deletion, presigned URLs (custom user agent `b2ai-deep-research-agent-app (backblaze-b2-samples)`, signature v4, no b2-native API).
 - **Anthropic API** — Claude Sonnet 4.6 powers the agent's reasoning, tool orchestration, and report writing, plus the bundled server-side `web_search` tool. Wrapped in `repo/llm_client.py`.
 - **The open web** — the agent fetches arbitrary source pages via Playwright Chromium (`repo/browser.py`). Fetched content is untrusted; see SECURITY.md for SSRF + prompt-injection handling.
 
