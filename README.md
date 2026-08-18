@@ -58,7 +58,7 @@ for it. See [ARCHITECTURE.md](ARCHITECTURE.md) for the full data flow.
 
 ## Quick Start
 
-You need: Node.js >= 20, pnpm >= 9, Python >= 3.11, a free **[Backblaze B2 account](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-deep-research-agent-app)**, and an **[Anthropic API key](https://console.anthropic.com/)**.
+You need: Node.js >= 20.9.0, pnpm >= 9, Python >= 3.11, a free **[Backblaze B2 account](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-deep-research-agent-app)**, and an **[Anthropic API key](https://console.anthropic.com/)**.
 
 > **Cost note.** The research agent is a *real* Claude Sonnet 4.6 tool-use loop with bundled web search and page reads. A single full research run typically costs **~$0.50–$1.10** (model tokens + ~6–10 web searches + reading ~6–10 pages, with prompt caching reducing re-reads). Tune it down with `RESEARCH_MAX_SEARCHES` / `RESEARCH_MAX_SOURCES`.
 
