@@ -11,7 +11,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:net";
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,12 +67,13 @@ function warn(msg, fix) {
   warnings.push({ msg, fix });
 }
 
-function tryExec(cmd) {
-  try {
-    return execSync(cmd, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-  } catch {
+function tryExecFile(file, args = [], options = {}) {
+  const result = spawnSync(file, args, { encoding: "utf8" });
+  if (result.error || result.status !== 0) {
     return null;
   }
+  const stderr = options.includeStderr ? result.stderr : "";
+  return `${result.stdout}${stderr}`.trim();
 }
 
 function parseSemver(s) {
@@ -99,7 +100,7 @@ function checkNode() {
 }
 
 function checkPnpm() {
-  const out = tryExec("pnpm --version");
+  const out = tryExecFile("pnpm", ["--version"]);
   if (!out) {
     fail("pnpm is not installed", "Install via corepack: `corepack enable && corepack prepare pnpm@latest --activate`");
     return;
@@ -127,13 +128,13 @@ function checkPython() {
     "python",
   ];
   for (const bin of candidates) {
-    const out = tryExec(`${bin} --version`);
+    const out = tryExecFile(bin, ["--version"]);
     if (!out) continue;
     const v = parseSemver(out);
     if (v && v.major >= 3 && v.minor >= REQUIRED_PYTHON_MINOR) return; // good
   }
   // Nothing suitable found — report using the first candidate that exists.
-  const found = candidates.map((b) => tryExec(`${b} --version`)).find(Boolean);
+  const found = candidates.map((b) => tryExecFile(b, ["--version"])).find(Boolean);
   if (found) {
     fail(
       `${found} is too old (need >= 3.${REQUIRED_PYTHON_MINOR})`,
@@ -251,10 +252,8 @@ function checkEnv() {
 // (checkVenv already failed) and only warn (non-fatal) if Chromium is absent.
 function checkChromium() {
   if (!existsSync(VENV_PYTHON)) return; // venv not built — checkVenv owns that
-  const out = tryExec(
-    `${VENV_PYTHON} -c "import playwright" 2>/dev/null && echo ok`,
-  );
-  if (out !== "ok") {
+  const playwrightInstalled = tryExecFile(VENV_PYTHON, ["-c", "import playwright"]) !== null;
+  if (!playwrightInstalled) {
     warn(
       "Playwright is not installed in the backend venv",
       "Run: `cd services/api && .venv/bin/pip install -r requirements.txt`",
@@ -263,8 +262,10 @@ function checkChromium() {
   }
   // `playwright install --dry-run chromium` prints an "install location"
   // line; if Chromium were already present it reports nothing to download.
-  const probe = tryExec(
-    `${VENV_PYTHON} -m playwright install --dry-run chromium 2>&1`,
+  const probe = tryExecFile(
+    VENV_PYTHON,
+    ["-m", "playwright", "install", "--dry-run", "chromium"],
+    { includeStderr: true },
   );
   if (probe && /download|is not installed|Install location/i.test(probe)) {
     warn(
