@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-05-01 -->
+<!-- last_verified: 2026-06-25 -->
 # AGENTS.md
 
 This is the authoritative control surface for all coding agents. Read this first.
@@ -135,7 +135,7 @@ mock `llm_client` and `browser`, so `pnpm test:api` needs no key and spends no t
 
 1. Read this file first.
 2. Review [ARCHITECTURE.md](ARCHITECTURE.md) before structural changes.
-3. For non-trivial changes, create a plan in `docs/exec-plans/active/`.
+3. For non-trivial changes, create a plan in `docs/exec-plans/`.
 4. Implement the smallest coherent change.
 5. Run: `pnpm lint && pnpm lint:api && pnpm test:api && pnpm check:structure`
 6. Update docs in the same PR (see §9).
@@ -157,7 +157,7 @@ See [docs/dev-workflows.md](docs/dev-workflows.md) for full details.
 | Setup or scope changes | `README.md` |
 | Security changes | `docs/SECURITY.md` |
 | Reliability changes | `docs/RELIABILITY.md` |
-| Active work plans | `docs/exec-plans/active/` |
+| Active work plans | `docs/exec-plans/` |
 | Known tech debt | `docs/exec-plans/tech-debt-tracker.md` |
 
 If documentation and implementation conflict, update docs in the same PR. Documentation rot destroys agent reliability.
